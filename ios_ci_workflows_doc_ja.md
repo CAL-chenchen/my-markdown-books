@@ -11,14 +11,14 @@
 ### CI/CDプラットフォーム
 - **プラットフォーム**: GitHub Actions
 - **ランナー**: 標準GitHub提供ランナー（macOS）
-- **オペレーティングシステム**: macOS 15.0.1 (25A362)
-- **Xcodeバージョン**: 16.0.1 Build 17A400
+- **オペレーティングシステム**: macOS 26.0.1 (25A362)
+- **Xcodeバージョン**: 26.0.1 Build 17A400
 
 ### コード署名
 - **証明書管理**: Fastlane Match
 - **ストレージ**: プライベートGitリポジトリ
 - **対応プロファイル**: 
-  - Ad-Hoc（最大100台のデバイス登録可能）
+  - Ad-Hoc（最大100台のiPhone登録可能）
   - App Store配信用
 
 ---
@@ -32,16 +32,15 @@
 **目的**: 自動テストと社内配信
 
 **設定**:
-- **トリガー**: `develop`ブランチへのプッシュまたは手動実行
-- **ビルド構成**: Debug
+- **トリガー**: 手動実行 (git操作でもいける。例え、gitタグ)
 - **プロビジョニングプロファイル**: Ad-Hoc
+- **ビルド構成 (Xcode Build Configuration)**: CI_AdHoc
 - **配信プラットフォーム**: Firebase App Distribution
-- **ターゲット環境**: テスト/ステージング環境
-- **デバイス制限**: 最大100台の登録済みデバイス
+- **ターゲット環境**: テスト環境
+- **デバイス制限**: 最大100台の登録済みデバイス(iPhone、iPod Touch、iPadなどで100台ずつ)
 - **典型的な使用例**:
   - QAテスト
   - 社内チームレビュー
-  - ステークホルダープレビュー
   - 特定のテスターによるベータテスト
 
 **ワークフローファイル**: `.github/workflows/firebase.yml`
@@ -59,9 +58,9 @@
 **目的**: Appleの公式プラットフォームを通じた本番環境対応のベータテスト
 
 **設定**:
-- **トリガー**: `main`ブランチへのプッシュ、バージョンタグ、または手動実行
-- **ビルド構成**: Release
+- **トリガー**: 手動実行 (git操作でもいける。例え、gitタグ)
 - **プロビジョニングプロファイル**: App Store
+- **ビルド構成 (Xcode Build Configuration)**: CI_AppStore
 - **配信プラットフォーム**: TestFlight（App Store Connect）
 - **ターゲット環境**: 本番環境
 - **デバイス制限**: 無制限（TestFlight経由）
@@ -86,14 +85,11 @@
 
 | 機能 | Firebase（Ad-Hoc） | TestFlight（App Store） |
 |------|-------------------|------------------------|
-| **ブランチ** | `develop` | `main` |
+| **ブランチ** | `feature`, `bugfix` | `release` |
 | **ビルドモード** | Debug | Release |
 | **プロビジョニング** | Ad-Hoc | App Store |
 | **環境** | テスト/ステージング | 本番 |
 | **デバイス制限** | 100台 | 無制限 |
-| **配信速度** | 高速（約15-20分） | 中速（約20-30分） |
-| **Appleレビュー** | 不要 | 不要（ベータの場合） |
-| **クラッシュレポート** | Firebase Crashlytics | App Store Connect |
 | **テスター管理** | Firebaseコンソール | App Store Connect |
 
 ---
@@ -103,7 +99,7 @@
 ### Firebaseワークフロー（テスト環境）
 
 ```
-開発者がdevelopにプッシュ
+未定（例：開発者からタグのプッシュ）
     ↓
 GitHub Actionsがトリガー
     ↓
@@ -121,7 +117,7 @@ GitHub Actionsがトリガー
 ### TestFlightワークフロー（本番環境）
 
 ```
-開発者がmainにプッシュまたはタグを作成
+未定（例：開発者からタグのプッシュ）
     ↓
 GitHub Actionsがトリガー
     ↓
@@ -141,50 +137,121 @@ TestFlightでビルドが利用可能に
 
 ---
 
+## ワークフローのトリガー
+
+### Firebase配信
+
+**自動トリガー**:
+```bash
+# developブランチにプッシュ
+git push origin develop
+```
+
+**手動トリガー**:
+- GitHubのActionsタブに移動
+- "Firebase Distribution"ワークフローを選択
+- "Run workflow"をクリック
+- `develop`ブランチを選択
+
+### TestFlight配信
+
+**自動トリガー**:
+```bash
+# mainブランチにプッシュ
+git push origin main
+
+# またはバージョンタグを作成
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+**手動トリガー**:
+- GitHubのActionsタブに移動
+- "TestFlight Distribution"ワークフローを選択
+- "Run workflow"をクリック
+- `main`ブランチを選択
+
+---
+
+## ビルド成果物
+
+### Firebaseビルド（Debug）
+- **形式**: .ipaファイル（Ad-Hoc署名）
+- **シンボル**: dSYMを含む
+- **サイズ**: 大きい（デバッグシンボルを含む）
+- **最適化**: なし
+- **ログ**: 詳細
+
+### TestFlightビルド（Release）
+- **形式**: .ipaファイル（App Store署名）
+- **シンボル**: dSYMは別途アップロード
+- **サイズ**: 最適化済み
+- **最適化**: 完全なコンパイラ最適化
+- **ログ**: 本番レベル
+
+---
+
 ## 環境変数とシークレット
 
 両方のワークフローには以下のGitHub Secretsが必要です：
 
 ### 認証
-- `APP_IDENTIFIER`: iOS アプリの Bundle Identifier
-- `APPLE_ID`: App Store Connect への 2FA ログイン に使用する Apple ID
-- `APPLE_ID_SPECIAL_PASSWORD`: 2FA を有効にしており、App Store Connect にバイナリをアップロードする場合に必要なアプリケーション用パスワード
-（詳細は [application-specific-password](https://docs.fastlane.tools/getting-started/ios/authentication/#method-3-application-specific-passwords) を参照）
-- `FASTLANE_SESSION`: 2FA を有効にした状態で、App Store Connect と通信する Fastlane の各アクションを使用する場合に事前生成したセッション情報
+- `APP_STORE_CONNECT_API_KEY_ID`: APIキー識別子
+- `APP_STORE_CONNECT_ISSUER_ID`: 発行者識別子
+- `APP_STORE_CONNECT_API_KEY`: Base64エンコードされた.p8キーファイル
 
 ### コード署名
 - `MATCH_PASSWORD`: 証明書リポジトリのパスフレーズ
-- `SSH_PRIVATE_KEY`: 証明書リポジトリを SSH で clone するため
+- `MATCH_GIT_BASIC_AUTHORIZATION`: Base64エンコードされたGit認証情報
 
 ### Firebase（Firebaseワークフローのみ）
 - `FIREBASE_TOKEN`: Firebase CLI認証トークン
 - `FIREBASE_APP_ID`: Firebaseアプリ識別子
-- `FIREBASE_DEBUG_APP_ID`: Firebaseアプリ識別子(debugバージョン)
 
 ---
 
-## ベストプラクティス（未定）
+## モニタリングとログ
+
+### ワークフローステータスの確認
+1. GitHubのリポジトリに移動
+2. **Actions**タブをクリック
+3. 特定のワークフロー実行を選択
+4. 各ステップのログを表示
+
+### ビルド成果物
+失敗したビルドは自動的に以下をアップロード：
+- ビルドログ
+- Fastlaneレポート
+- Gymログ（ビルド失敗時）
+
+### 通知
+- GitHubはワークフロー失敗時に自動通知
+- オプション: Slack/メール通知の設定
+
+---
+
+## ベストプラクティス
 
 ### 開発ワークフロー
-1. **機能開発**: 機能ブランチ(`feature/*`)で作業
-2. **テスト**: `feature/*` → Firebase配信をトリガー
+1. **機能開発**: 機能ブランチで作業
+2. **テスト**: `develop`にマージ → Firebase配信をトリガー
 3. **QA承認**: Firebase経由で登録済みデバイスでテスト
-4. **本番**: `release`にマージ → TestFlight配信をトリガー
+4. **本番**: `main`にマージ → TestFlight配信をトリガー
 5. **最終テスト**: TestFlightベータテスト
 6. **リリース**: App Store ConnectからApp Storeに申請
 
-### ブランチ戦略（未定）
+### ブランチ戦略
 ```
-    feature/* → release → App Store → main
-        ↓          ↓
-    Firebase  TestFlight
-    (Debug)   (Release)
+feature/* → develop → main → App Store
+              ↓          ↓
+           Firebase  TestFlight
+           (Debug)   (Release)
 ```
 
 ### バージョン管理
-- **ビルド番号**: Fastlaneによって自動インクリメント(TestFlightのみ)
+- **ビルド番号**: Fastlaneによって自動インクリメント
 - **バージョン番号**: Xcodeプロジェクトで手動更新
-- **タグ付け**（検討中）: リリースにはセマンティックバージョニング（v1.2.3）を使用
+- **タグ付け**: リリースにはセマンティックバージョニング（v1.2.3）を使用
 
 ---
 
@@ -204,10 +271,8 @@ bundle exec fastlane match adhoc --force
 - `FIREBASE_APP_ID`が正しいか確認
 
 **3. TestFlightアップロード失敗**
-- App Store Connectでの認証に FASTLANE_SESSION（2FA セッション）の有効期限が不定（通常 2〜4 週間）
-- Apple 側のセキュリティ判定で突然失効することがある
-- 結果として、「昨日まで動いていた CI が突然失敗する」、リリース作業が属人化し、障害対応コストが高くなる
-- App Store Connect API Keyのほうが Apple が公式に提供・推奨している
+- App Store ConnectでAPIキーのアクセス権限を確認
+- Bundle Identifierが一致しているか確認
 
 **4. ビルドタイムアウト**
 - 標準GitHubランナーには6時間のタイムアウトがある
@@ -259,6 +324,6 @@ XcodeまたはmacOSバージョンを更新する場合：
 
 ## ドキュメント情報
 
-**最終更新日**: 2025年12月  
+**最終更新日**: 2024年12月  
 **管理者**: iOSデベロップメントチーム  
 **バージョン**: 1.0
