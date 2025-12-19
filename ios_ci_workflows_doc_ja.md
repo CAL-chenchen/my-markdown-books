@@ -1,4 +1,4 @@
-<img width="72" height="32" alt="image" src="https://github.com/user-attachments/assets/5befd574-a179-4063-bdfc-1c032a5d8eb7" /># iOS CI/CDワークフロードキュメント
+# iOS CI/CDワークフロードキュメント
 
 ## 概要
 
