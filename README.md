@@ -9,12 +9,12 @@
        width="100%" />
 </p>
 
-<h1 align="center">🚀 iOS CI/CD Knowledge Base</h1>
+<h1 align="center">🚀 Knowledge Base</h1>
 
 <p align="center">
   <strong>
-    Fastlane × GitHub Actions × Firebase / TestFlight<br/>
-    ― 実践ベースでまとめた iOS 自動化ナレッジ集 ―
+    Apple × Google × Microsoft<br/>
+    ― 実践ベースでまとめた自動化ナレッジ集 ―
   </strong>
 </p>
 
@@ -28,12 +28,13 @@
 
 ## ✨ このリポジトリについて
 
-このリポジトリは、**iOS アプリの CI/CD 構築・運用に関する知見を体系的にまとめた GitBook 用ナレッジベース**です。
+このリポジトリは、**アプリの構築・運用に関する知見を体系的にまとめたナレッジベース**です。
 
 - 実際のプロダクト運用で得られたノウハウ
 - 証明書・プロビジョニングの落とし穴
-- Fastlane / GitHub Actions の設計思想
+- Mobile Applications の設計思想
 - チームで安全に回すためのベストプラクティス
+- とにかくなんでもいい構想
 
 を中心に、「**あとから来た人が読んで理解できる**」ことを最優先に整理しています。
 
@@ -41,14 +42,14 @@
 
 ## 🧭 対象読者
 
-- iOS CI/CD をこれから整備したい方
-- Fastlane / GitHub Actions を運用している開発者
+- 開発について整備したい方
+- GitBook を運用している開発者
 - 証明書・App Store Connect 周りで苦しんだ経験のある方
-- 属人化しない iOS 運用を目指すチーム
+- 属人化しない運用を目指すチーム
 
 ---
 
-## 🏗 全体構成イメージ
+## 🏗 全体構成イメージ(例)
 
 ```mermaid
 flowchart LR
