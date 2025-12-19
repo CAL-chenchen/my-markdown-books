@@ -4,8 +4,8 @@
 <!-- ===================================================== -->
 
 <p align="center">
-  <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c"
-       alt="cover"
+  <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c4/ee/cc/c4eecc6e-6626-7816-4895-3f7717e8e460/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/1200x630wa.png"
+       alt="welp - スポットワークアプリ"
        width="100%" />
 </p>
 
